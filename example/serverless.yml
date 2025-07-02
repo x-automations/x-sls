@@ -1,0 +1,31 @@
+service: x-sls-example
+
+frameworkVersion: '3'
+
+useDotenv: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: ${env:PORT, 4000}
+    noPrependStageInUrl: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    STAGE: ${self:provider.stage}
+    PLAINTEXT_VAR: ${env:PLAINTEXT_VAR, 'default-plaintext'}
+    SECURE_VAR: ${env:SECURE_VAR, 'default-secure'}
+
+functions:
+  readEnv:
+    handler: src/handlers.readEnv
+    events:
+      - http:
+          path: /env
+          method: get
