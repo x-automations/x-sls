@@ -1,9 +1,8 @@
 {
   "name": "@x-sls/env",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.840.0"
   }

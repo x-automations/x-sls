@@ -1,6 +1,6 @@
 {
   "name": "@x-sls/example",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.js",
   "scripts": {
     "start": "serverless offline start --reloadHandler"
@@ -13,4 +13,4 @@
     "serverless": "^3.40.0",
     "serverless-offline": "^13.9.0"
   }
-} 
+}

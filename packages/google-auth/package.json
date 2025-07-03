@@ -1,9 +1,8 @@
 {
   "name": "@x-sls/google-auth",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "src/index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "dependencies": {
     "jsonwebtoken": "^9.0.2"
   }
