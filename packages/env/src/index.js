@@ -1,18 +1,11 @@
 const { SSMClient, GetParameterCommand } = require('@aws-sdk/client-ssm')
+
 const client = new SSMClient()
 
 const SSM_PREFIX = 'ssm:'
 const SSM_SECRET_PREFIX = `ssm:x:`
 
 const lookup = {}
-
-async function getEnv(key) {
-  if (!lookup[key]) {
-    lookup[key] = await resolveEnv(process.env[key])
-  }
-
-  return lookup[key]
-}
 
 async function resolveEnv(val) {
   // If this is not an SSM key, return the value as-is
@@ -36,7 +29,16 @@ async function resolveEnv(val) {
     return res?.Parameter?.Value
   } catch (error) {
     console.error(error)
+    return null
   }
+}
+
+async function getEnv(key) {
+  if (!lookup[key]) {
+    lookup[key] = await resolveEnv(process.env[key])
+  }
+
+  return lookup[key]
 }
 
 module.exports = getEnv

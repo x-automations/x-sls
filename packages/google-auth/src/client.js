@@ -3,9 +3,8 @@ function createClient({
   GOOGLE_CLIENT_SECRET,
   REDIRECT_URI
 }) {
-  const createAuthUrl = () => {
-    return `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=profile email`
-  }
+  const createAuthUrl = () =>
+    `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=profile email`
 
   const getAccessToken = async ({ code }) => {
     let text

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "serverless offline start --reloadHandler",
+    "start": "serverless offline start --reloadHandler"
   },
   "dependencies": {
     "@x-sls/env": "1.0.0",

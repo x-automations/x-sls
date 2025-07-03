@@ -1,7 +1,7 @@
 const env = require('@x-sls/env')
 const googleAuth = require('@x-sls/google-auth')
 
-const readEnv = async event => {
+const readEnv = async () => {
   const plaintext = await env('PLAINTEXT_VAR')
   const secure = await env('SECURE_VAR')
   return {
@@ -9,9 +9,9 @@ const readEnv = async event => {
   }
 }
 
-let authClient
+let _authClient
 async function createAuthClient() {
-  if (!authClient) {
+  if (!_authClient) {
     const GOOGLE_CLIENT_ID = await env('GOOGLE_CLIENT_ID')
     const GOOGLE_CLIENT_SECRET = await env('GOOGLE_CLIENT_SECRET')
     const REDIRECT_URI = await env('REDIRECT_URI')
@@ -22,7 +22,7 @@ async function createAuthClient() {
     })
   }
 
-  return authClient
+  return _authClient
 }
 
 async function googleAuthInit() {
