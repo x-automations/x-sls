@@ -10,7 +10,6 @@ plugins:
 custom:
   serverless-offline:
     httpPort: ${env:PORT, 4000}
-    noPrependStageInUrl: true
 
 provider:
   name: aws
@@ -21,6 +20,11 @@ provider:
     STAGE: ${self:provider.stage}
     PLAINTEXT_VAR: ${env:PLAINTEXT_VAR, 'default-plaintext'}
     SECURE_VAR: ${env:SECURE_VAR, 'default-secure'}
+    # Google Auth
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+    GOOGLE_CLIENT_SECRET: ${env:GOOGLE_CLIENT_SECRET}
+    REDIRECT_URI: ${env:REDIRECT_URI}
+    JWT_SECRET: ${env:JWT_SECRET}
 
 functions:
   readEnv:
@@ -29,3 +33,25 @@ functions:
       - http:
           path: /env
           method: get
+
+  googleAuthInit:
+    handler: src/handlers.googleAuthInit
+    events:
+      - http:
+          path: /google-auth
+          method: get
+
+  googleAuthCallback:
+    handler: src/handlers.googleAuthCallback
+    timeout: 30
+    events:
+      - http:
+          path: /google-auth/callback
+          method: get
+
+  googleAuthVerify:
+    handler: src/handlers.googleAuthVerify
+    events:
+      - http:
+          path: /google-auth/verify
+          method: post

@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "test": "jest",
-    "lint": "eslint src --ext .js",
-    "clean": "rm -rf dist"
   },
   "dependencies": {
     "@aws-sdk/client-ssm": "^3.840.0"

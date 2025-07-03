@@ -4,12 +4,10 @@
   "main": "src/index.js",
   "scripts": {
     "start": "serverless offline start --reloadHandler",
-    "test": "jest",
-    "lint": "eslint src --ext .js",
-    "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@x-sls/env": "workspace:*"
+    "@x-sls/env": "1.0.0",
+    "@x-sls/google-auth": "1.0.0"
   },
   "devDependencies": {
     "serverless": "^3.40.0",
