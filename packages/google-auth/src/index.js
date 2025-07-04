@@ -1,7 +1,7 @@
-const createClient = require('./client')
+const client = require('./client')
 const handlers = require('./handlers')
 
 module.exports = {
-  createClient,
+  client,
   handlers
 }

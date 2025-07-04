@@ -61,3 +61,4 @@ functions:
       - http:
           path: /google-auth/verify
           method: post
+          cors: true
