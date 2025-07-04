@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authentication Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: sans-serif;
+        background: #444;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+      }
+
+      .loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .user-info {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #667eea;
+      }
+
+      .user-name {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .user-email {
+        color: #666;
+        font-size: 0.9rem;
+      }
+
+      .login-section {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .welcome-text {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 1rem;
+      }
+
+      .btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      .btn.logout {
+        background: #ff6b6b;
+        margin: 12px;
+      }
+
+      .btn.logout:hover {
+        box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+      }
+
+      .error {
+        color: #e74c3c;
+        background: #fdf2f2;
+        border: 1px solid #fecaca;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 1rem;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Loading State -->
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Checking authentication...</p>
+      </div>
+
+      <!-- User Info (when authenticated) -->
+      <div id="userInfo" class="user-info hidden">
+        <img id="userAvatar" class="user-avatar" src="" alt="User Avatar" />
+        <h2 id="userName" class="user-name"></h2>
+        <p id="userEmail" class="user-email"></p>
+        <button id="logoutBtn" class="btn logout">Logout</button>
+      </div>
+
+      <!-- Login Section (when not authenticated) -->
+      <div id="loginSection" class="login-section hidden">
+        <h2 class="welcome-text">Welcome!</h2>
+        <p style="color: #666; margin-bottom: 1.5rem">
+          Please sign in to continue
+        </p>
+        <a id="loginButton" href="#" class="btn">Sign in with Google</a>
+      </div>
+
+      <!-- Error Message -->
+      <div id="error" class="error hidden"></div>
+    </div>
+
+    <script>
+      // API base URL - adjust this based on your serverless deployment
+      const API_BASE = ''
+
+      // DOM elements
+      const loadingEl = document.getElementById('loading')
+      const userInfoEl = document.getElementById('userInfo')
+      const loginSectionEl = document.getElementById('loginSection')
+      const loginButtonEl = document.getElementById('loginButton')
+      const errorEl = document.getElementById('error')
+      const userAvatarEl = document.getElementById('userAvatar')
+      const userNameEl = document.getElementById('userName')
+      const userEmailEl = document.getElementById('userEmail')
+      const logoutBtn = document.getElementById('logoutBtn')
+
+      // set the return URL
+      loginButtonEl.setAttribute(
+        'href',
+        `/google-auth?returnUrl=${encodeURIComponent(window.location.origin)}`
+      )
+
+      // Show/hide functions
+      function showLoading() {
+        loadingEl.classList.remove('hidden')
+        userInfoEl.classList.add('hidden')
+        loginSectionEl.classList.add('hidden')
+        errorEl.classList.add('hidden')
+      }
+
+      function showUserInfo() {
+        loadingEl.classList.add('hidden')
+        userInfoEl.classList.remove('hidden')
+        loginSectionEl.classList.add('hidden')
+        errorEl.classList.add('hidden')
+      }
+
+      function showLogin() {
+        loadingEl.classList.add('hidden')
+        userInfoEl.classList.add('hidden')
+        loginSectionEl.classList.remove('hidden')
+        errorEl.classList.add('hidden')
+      }
+
+      function showError(message) {
+        loadingEl.classList.add('hidden')
+        userInfoEl.classList.add('hidden')
+        loginSectionEl.classList.add('hidden')
+        errorEl.classList.remove('hidden')
+        errorEl.textContent = message
+      }
+
+      // Check if user has a valid session
+      async function checkSession() {
+        try {
+          // Check if we have a token in localStorage
+          const token = localStorage.getItem('authToken')
+          if (!token) {
+            showLogin()
+            return
+          }
+
+          // Verify the token with the server
+          const response = await fetch(`${API_BASE}/google-auth/verify`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ token })
+          })
+
+          if (response.ok) {
+            const data = await response.json()
+            displayUserInfo(data.user)
+            showUserInfo()
+          } else {
+            // Token is invalid, remove it and show login
+            localStorage.removeItem('authToken')
+            showLogin()
+          }
+        } catch (error) {
+          console.error('Error checking session:', error)
+          showError('Failed to check authentication status. Please try again.')
+        }
+      }
+
+      // Display user information
+      function displayUserInfo(user) {
+        userAvatarEl.src =
+          user.picture ||
+          'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iODAiIHZpZXdCb3g9IjAgMCA4MCA4MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiNEN0Q3RDciLz4KPHN2ZyB4PSIyMCIgeT0iMjAiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDE0IDcgMTYuMzMgNyAxOVYyMEgxN1YxOUMxNyAxNi4zMyAxNC42NyAxNCAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo='
+        userNameEl.textContent = user.name || 'User'
+        userEmailEl.textContent = user.email || ''
+      }
+
+      // Handle logout
+      function handleLogout() {
+        localStorage.removeItem('authToken')
+        showLogin()
+      }
+
+      // Check for OAuth callback
+      function checkForCallback() {
+        const urlParams = new URLSearchParams(window.location.hash.substring(1))
+        const token = urlParams.get('token')
+
+        if (token) {
+          // Store the token and clean up the URL
+          localStorage.setItem('authToken', token)
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+          )
+
+          // Check session again to display user info
+          checkSession()
+        }
+      }
+
+      // Event listeners
+      logoutBtn.addEventListener('click', handleLogout)
+
+      // Initialize the app
+      function init() {
+        // Check for OAuth callback first
+        checkForCallback()
+
+        // Then check session status
+        checkSession()
+      }
+
+      // Start the app when DOM is loaded
+      document.addEventListener('DOMContentLoaded', init)
+    </script>
+  </body>
+</html>

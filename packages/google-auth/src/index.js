@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken')
 const createClient = require('./client')
+const handlers = require('./handlers')
 
 module.exports = {
   createClient,
-  jwt
+  handlers
 }

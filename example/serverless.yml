@@ -6,6 +6,12 @@ useDotenv: true
 
 plugins:
   - serverless-offline
+  - serverless-lift
+
+constructs:
+  landing:
+    type: single-page-app
+    path: dist
 
 custom:
   serverless-offline:

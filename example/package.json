@@ -3,14 +3,16 @@
   "version": "1.0.1",
   "main": "src/index.js",
   "scripts": {
-    "start": "serverless offline start --reloadHandler"
+    "start": "serverless offline start --reloadHandler",
+    "build": "cp index.html dist/"
   },
   "dependencies": {
-    "@x-sls/env": "1.0.0",
-    "@x-sls/google-auth": "1.0.0"
+    "@x-sls/env": "file:../packages/env",
+    "@x-sls/google-auth": "file:../packages/google-auth"
   },
   "devDependencies": {
     "serverless": "^3.40.0",
+    "serverless-lift": "^1.31.0",
     "serverless-offline": "^13.9.0"
   }
 }
