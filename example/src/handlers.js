@@ -9,6 +9,10 @@ const readEnv = async () => {
   }
 }
 
+async function isUserAllowed(email) {
+  return Boolean(email)
+}
+
 async function googleAuthInit(event) {
   const GOOGLE_CLIENT_ID = await env('GOOGLE_CLIENT_ID')
   const REDIRECT_URI = await env('REDIRECT_URI')
@@ -29,14 +33,16 @@ async function googleAuthCallback(event) {
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
     REDIRECT_URI,
-    JWT_SECRET
+    JWT_SECRET,
+    isUserAllowed
   })(event)
 }
 
 async function googleAuthVerify(event) {
   const JWT_SECRET = await env('JWT_SECRET')
   return googleAuth.handlers.verify({
-    JWT_SECRET
+    JWT_SECRET,
+    isUserAllowed
   })(event)
 }
 

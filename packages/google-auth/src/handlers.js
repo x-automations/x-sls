@@ -22,8 +22,9 @@ function initiate({ GOOGLE_CLIENT_ID, REDIRECT_URI }) {
 function callback({
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
+  JWT_SECRET,
   REDIRECT_URI,
-  JWT_SECRET
+  isUserAllowed
 }) {
   return async event => {
     const { code, state } = event.queryStringParameters
@@ -47,6 +48,12 @@ function callback({
       const info = await getUserInfo({ access_token })
 
       const { email, name, picture } = info
+
+      const isAllowed = await isUserAllowed(email)
+      if (!isAllowed) {
+        throw new Error('Contact admin for access.')
+      }
+
       const sessionToken = jwt.sign(
         {
           email,
@@ -75,11 +82,16 @@ function callback({
   }
 }
 
-function verify({ JWT_SECRET }) {
+function verify({ JWT_SECRET, isUserAllowed }) {
   return async event => {
     try {
       const { token } = JSON.parse(event.body)
       const decoded = jwt.verify(token, JWT_SECRET)
+
+      const isAllowed = await isUserAllowed(decoded.email)
+      if (!isAllowed) {
+        throw new Error('Contact admin for access.')
+      }
 
       return {
         statusCode: 200,
@@ -96,7 +108,7 @@ function verify({ JWT_SECRET }) {
           'Access-Control-Allow-Origin': '*',
           'Access-Control-Allow-Credentials': true
         },
-        body: JSON.stringify({ error: 'Invalid token' })
+        body: JSON.stringify({ error: error.message })
       }
     }
   }
